@@ -1,5 +1,11 @@
 # Report — Software Construction Assignment 1: CI/CD Pipeline
 
+| | |
+|---|--|
+| **Name** | Mohammed Rzgar |
+| **Email** | mrqiu220367@uniq.edu.iq |
+| **GitHub / Jenkins identity** | kaka hama (Jenkins user created via **GitHub** login; Jenkins on **Windows** as installed in Programs) |
+
 **Objective:** Build a **Continuous Integration / Continuous Deployment (CI/CD)** flow using **Jenkins**, **GitHub**, and **Docker**, in which a push to a repository can trigger a Jenkins job that **builds and tests** the software and then **publishes a container image to Docker Hub**.
 
 *Align the terms below with your own module lecture notes, slides, and diagrams (e.g. definitions of CI, CD, automated testing, and deployment artifacts).*

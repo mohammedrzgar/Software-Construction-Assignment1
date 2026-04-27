@@ -1,5 +1,11 @@
 # Assignment 1 — CI/CD (Jenkins, GitHub, Docker)
 
+**Student:** Mohammed Rzgar  
+**Email:** mrqiu220367@uniq.edu.iq  
+**GitHub (Jenkins login):** kaka hama — Jenkins is set up to sign in with **GitHub** (OAuth), which links your Jenkins user to your GitHub account for jobs that pull from GitHub and for webhook/authentication options your instructor describes.
+
+---
+
 Small Flask application with a **Jenkins pipeline** that runs automated tests, builds a **Docker** image, and **pushes** it to **Docker Hub** when the pipeline runs (e.g. after a push to GitHub that triggers a build).
 
 ## What is in the repo
@@ -34,9 +40,18 @@ docker run --rm -p 5000:5000 assignment-1-app:local
 
 ## Jenkins — what you need
 
-1. **Jenkins** with a Linux agent (or a controller that can run a `sh` step and `python3` + `docker`).  
-2. **Plugins (typical)**: Pipeline, perhaps Credentials Binding, Git, any Docker integration you use.  
-3. **Tooling on the agent**: `python3`, `pip`, and `docker` available to the Jenkins user (on Linux, often: user in the `docker` group, or a Docker-in-Docker setup as per your course/lab).  
+### If Jenkins is on Windows (your case)
+
+- Jenkins is installed under your Windows **Programs** (e.g. runs as a service; dashboard usually at `http://localhost:8080` unless you changed the port in `C:\Program Files\Jenkins\jenkins.xml` or the installer’s settings).  
+- **GitHub sign-in:** You created your Jenkins user via **Log in with GitHub**; use that account when configuring jobs and plugins that need a Git identity. For **cloning** private repositories, you may still need a **Pipeline job** to use a **GitHub personal access token** (PAT) or SSH key stored in **Manage Jenkins → Credentials** — follow your course if they require a service account.  
+- This project’s `Jenkinsfile` uses the **`sh`** step (Bash). On Windows nodes you typically need **Git for Windows** installed so `sh` resolves, or a **remote Linux agent** where the pipeline actually runs. If the build fails with *“sh not found”*, install Git and ensure Jenkins’ `PATH` includes it, or run the job on a Linux agent / WSL.  
+- Use **`py -3.12`** (or your installed Python) instead of `python3` if your machine only has the `py` launcher. Use **Docker Desktop** on Windows and ensure the Jenkins process can call `docker` (sometimes “Expose daemon” or running the agent in a way that can reach Docker, depending on your lab’s instructions).
+
+### General requirements
+
+1. **Jenkins** with an agent that can run the pipeline: **`sh`**, **Python 3 + pip**, and **`docker`**. (Linux or WSL agents are the usual default for this `Jenkinsfile`.)  
+2. **Plugins (typical)**: Pipeline, **Git**, **Credentials**, **Pipeline: GitHub** (or similar) for Git operations; if you use a GitHub webhook, the **Generic Webhook** or **GitHub** plugin as your instructor documents.  
+3. **Tooling on the agent**: `python3` (or `py` on Windows), and `docker` available to the process that runs the build. On Linux, the Jenkins user is often in the `docker` group, or the lab uses Docker-in-Docker.  
 4. **Credential in Jenkins** (matches `Jenkinsfile`):
 
    - Type: *Username with password*  
