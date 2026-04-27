@@ -1,11 +1,8 @@
-"""
-Small HTTP service for Assignment 1 — used as the app under CI/CD.
-"""
 from flask import Flask, jsonify
 
 app = Flask(__name__)
 
-APP_NAME = "assignment-1-cicd-demo"
+APP_NAME = "sc-assignment1-api"
 VERSION = "1.0.0"
 
 
@@ -15,7 +12,7 @@ def index():
         {
             "service": APP_NAME,
             "version": VERSION,
-            "message": "CI/CD pipeline demo: Jenkins, GitHub, Docker Hub",
+            "message": "Software Construction — Assignment 1 (Flask, Jenkins, Docker)",
         }
     )
 

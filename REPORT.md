@@ -1,104 +1,59 @@
-# Report — Software Construction Assignment 1: CI/CD Pipeline
+# Software Construction — Assignment 1: CI/CD (Report)
 
-| | |
-|---|--|
-| **Name** | Mohammed Rzgar |
-| **Email** | mrqiu220367@uniq.edu.iq |
-| **GitHub / Jenkins identity** | kaka hama (Jenkins user created via **GitHub** login; Jenkins on **Windows** as installed in Programs) |
+| Name | Mohammed Rzgar |
+|------|----------------|
+| Email | mrqiu220367@uniq.edu.iq |
+| GitHub / Jenkins | `mohammedrzgar` — Jenkins access uses **GitHub** sign-in on a **Windows** installation |
 
-**Objective:** Build a **Continuous Integration / Continuous Deployment (CI/CD)** flow using **Jenkins**, **GitHub**, and **Docker**, in which a push to a repository can trigger a Jenkins job that **builds and tests** the software and then **publishes a container image to Docker Hub**.
+## 1. Objective
 
-*Align the terms below with your own module lecture notes, slides, and diagrams (e.g. definitions of CI, CD, automated testing, and deployment artifacts).*
+Design and document a **CI/CD** process using **Jenkins**, **GitHub**, and **Docker**: a change in the repository can trigger a Jenkins run that **builds and tests** the software and then **publishes a container image to Docker Hub**.
 
----
+## 2. Short introduction to CI/CD
 
-## 1. Introduction
+**Continuous integration (CI)** means integrating work often, with the server automatically building the project and running tests on each change so that errors appear quickly. **Continuous delivery / deployment (CD)** extends this by automatically preparing or shipping a **release**—here, a **Docker image** stored in a **registry** (Docker Hub) that can be run on any host with Docker.
 
-Modern software is delivered frequently and reliably by automating **build**, **test**, and **release** steps. A **CI/CD pipeline** runs these steps in a defined order, often on every change integrated into a shared mainline branch, so that defects are found early and releases are **repeatable**.
+In this work, GitHub is the **source of truth** for the code, Jenkins is the **automation server** that runs the `Jenkinsfile` pipeline, and Docker packages the app so the same artifact can be run consistently.
 
-This project implements a minimal end-to-end flow:
+## 3. System overview
 
-- **Source control (GitHub)** — stores versioned code and can notify the automation server on new commits.  
-- **Jenkins** — runs the **pipeline** defined in `Jenkinsfile`.  
-- **Docker** — packages the application into a portable **image**; **Docker Hub** stores the built image for deployment or hand-off.
+1. Code is pushed to a **GitHub** repository.  
+2. A **webhook** (or polling) starts a **Jenkins** build.  
+3. Jenkins **checks out** the branch, sets up a Python **virtual environment**, **installs dependencies** from `requirements.txt`, and runs **pytest** with **coverage** on the Flask service.  
+4. If the tests pass, the pipeline runs **`docker build`** and **`docker push`** to Docker Hub, using tags that include the **Jenkins build number** and **`latest`**.
 
-*Reference your lecture material on: goals of automated pipelines, “shift left” testing, and the difference between building software and running it in production-like environments.*
+## 4. Stages in the pipeline (Jenkins)
 
----
+| Stage | What runs | Role |
+|--------|-----------|------|
+| Checkout | Commit from Git | Reproducible, known revision. |
+| Install and test | `pip install` + `pytest` | **CI** feedback before producing an image. |
+| Build and push image | `docker build` + `docker push` | Produces a **versioned** container image. |
 
-## 2. System overview
+Failing tests stop the pipeline, so a broken build is not published.
 
-1. A developer **pushes** changes to a GitHub repository.  
-2. **GitHub** (via webhook or Jenkins polling) triggers a **Jenkins** build.  
-3. Jenkins **checks out** the repository, runs the pipeline from `Jenkinsfile`, **installs dependencies** in a virtual environment, and runs **pytest** (continuous integration: compile/build + test in one automated path).  
-4. If tests pass, Jenkins **builds** a Docker **image** from the `Dockerfile` and **pushes** it to **Docker Hub** (deployment artifact; “release” in the sense of an immutable, versioned deliverable the operations side can run anywhere Docker runs).  
+## 5. GitHub and Jenkins
 
-*Tie to your notes: “pipeline stages,” “gated promotion” (e.g. only build/push image if tests pass), and the role of **artifacts**.*
-
----
-
-## 3. Activities included in the CI task (Jenkins)
-
-| Step | What happens (this project) | Why it matters (CI) |
-|------|----------------------------|---------------------|
-| **Source checkout** | Jenkins fetches the commit that triggered the job | Reproducible build from known revision. |
-| **Environment setup** | Create a Python `venv` and `pip install` from `requirements.txt` | Isolated, repeatable dependency install. |
-| **Automated tests** | `pytest` (with coverage) against `app.py` | Fast feedback; catches regressions before a release build. |
-| **Docker build** | `docker build` using the `Dockerfile` | Bakes a tested app into a standard, runnable unit. |
-| **Push to registry** | `docker push` to Docker Hub with build number + `latest` | Stores the versioned **artifact** for deployment or other environments. |
-
-*Map each row to the vocabulary from your **Software Construction** lectures: e.g. integration testing, build automation, and feedback loops.*
-
----
-
-## 4. Activities in the CD part (in this assignment)
-
-- **CD** is often defined as *automated delivery* or *deployment* to an environment. Here, the main **delivery** step is **publishing the image to Docker Hub** (the **deployment** target can be a server, Kubernetes cluster, or a lab VM that runs `docker pull` and `docker run` — that last mile depends on your course; mention it in one sentence in your hand-in).  
-- Using **tags** (e.g. `BUILD_NUMBER` and `latest`) links the running container to a specific build for traceability.
-
-*Reference your notes: CD vs “continuous delivery” vs “continuous deployment” if your course distinguishes them.*
-
----
-
-## 5. GitHub integration (trigger)
-
-To **detect changes** on push, the repository can send an HTTP request to Jenkins (**webhook**), or Jenkins can **poll** the repository. Your `README.md` lists a typical webhook path for GitHub-integrated Jenkins.
-
-*Cite your lecture or lab: event-driven build vs scheduled polling, and branch strategy if applicable.*
-
----
+To react to new commits, the repository is linked to Jenkins either by a **webhook** (HTTP POST to Jenkins) or by **SCM polling**. The pipeline definition lives in the repo as `Jenkinsfile` so the build is **versioned** like the code.
 
 ## 6. Docker and Docker Hub
 
-- **Dockerfile** describes a **image**: base OS, dependencies, and how to start the app.  
-- **Image** = immutable package; **container** = a running instance of that image.  
-- **Docker Hub** is a **container registry** where the pipeline stores built images. Credentials must not be committed; Jenkins stores them in its **Credentials** store and injects them at run time in the `Build and push` stage.
+A **Dockerfile** defines the **image**: base system, dependencies, and the command to start the application (**Gunicorn** in this project). The image is a **portable** unit. **Docker Hub** stores the built images. **Secrets** (Docker Hub login) are not stored in Git: they are configured in **Jenkins → Credentials** and read in the `Build and push` stage. Using an **access token** instead of the main account password is recommended for Docker Hub.
 
-*From your materials: add one sentence on container benefits (consistency, isolation) if that appears in the module.*
+## 7. Security notes
 
----
-
-## 7. Security and good practice (brief)
-
-- Prefer **access tokens** over a primary password for Docker Hub.  
-- Keep **secrets in Jenkins** (e.g. `dockerhub-credentials`), not in the repository.  
-- Every pipeline run should be traceable to a **Git commit** and a **Jenkins build number** / **image tag**.
-
----
+- Keep registry credentials in Jenkins, not in the repository.  
+- Use tokens with limited scope where possible.  
+- **Build number** and **Git** revision together identify what was built.
 
 ## 8. Conclusion
 
-The assignment demonstrates a **version-controlled application**, an **automated test gate**, a **container build**, and a **pushed** deployable **artifact** on Docker Hub, coordinated by a **Jenkins pipeline** triggered from **GitHub**. The same pattern scales to more stages (linting, staging deployment, production promotion) as covered in your course.
+The project shows an automated path from a **Git push** to **tested, containerized** software on **Docker Hub**, with Jenkins orchestrating the steps. Further extensions could include a staging environment, stricter static analysis, or deployment to a cloud service.
 
-*Final paragraph: one line pointing to the exact slide set or book chapter you used in **Software Construction** (replace this sentence with a proper reference per your school’s style).*
+## 9. References
 
----
-
-## 9. References (fill in)
-
-- Software Construction **lecture notes** / **slides** — *Module, week, topic (CI/CD, DevOps, testing).*  
-- Official docs (optional): Jenkins Pipelines, Docker, GitHub webhooks, Docker Hub.
-
----
-
-*This report is a template aligned with a typical “CI/CD with Jenkins + Git + Docker” assignment. Adjust wording to match the definitions and examples from **your** lectures and any rubric (length, required sections, or screenshots: Jenkins build log, Docker Hub page, etc.).*
+- Software Construction module — **lecture materials** on version control, automated builds, testing, and **DevOps/CI-CD** (insert specific week and title per your hand-in rules).  
+- [Jenkins Pipeline](https://www.jenkins.io/doc/book/pipeline/)  
+- [Dockerfile reference](https://docs.docker.com/reference/dockerfile/)  
+- [GitHub: Webhooks](https://docs.github.com/en/webhooks)  
+- [Docker Hub: access tokens](https://docs.docker.com/security/access-tokens/)

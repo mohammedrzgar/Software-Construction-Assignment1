@@ -1,15 +1,7 @@
-/**
- * Software Construction – Assignment 1: CI/CD (Jenkins + GitHub + Docker Hub)
- *
- * In Jenkins, add credentials:
- *   Kind: Username with password
- *   ID: dockerhub-credentials
- *   Username: your Docker Hub username
- *   Password: Docker Hub access token (recommended) or account password
- *
- * Optional: install plugins "Pipeline", "Docker pipeline", and ensure the agent
- * can run "docker" (Jenkins user in the docker group, or Docker-in-Docker).
- */
+// Software Construction – Assignment 1. Jenkins: add credential
+//   Kind: Username with password
+//   ID: dockerhub-credentials
+//   (Docker Hub user + access token)
 pipeline {
     agent any
 

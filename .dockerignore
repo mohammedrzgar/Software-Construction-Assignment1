@@ -9,4 +9,3 @@ htmlcov
 *.md
 .env
 Jenkinsfile
-.cursor
