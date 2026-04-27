@@ -52,7 +52,7 @@ The project shows an automated path from a **Git push** to **tested, containeriz
 
 ## 9. References
 
-- Software Construction module — **lecture materials** on version control, automated builds, testing, and **DevOps/CI-CD** (insert specific week and title per your hand-in rules).  
+- Software Construction module — **lecture materials** on version control, automated builds, testing, and **DevOps/CI-CD**.  
 - [Jenkins Pipeline](https://www.jenkins.io/doc/book/pipeline/)  
 - [Dockerfile reference](https://docs.docker.com/reference/dockerfile/)  
 - [GitHub: Webhooks](https://docs.github.com/en/webhooks)  
