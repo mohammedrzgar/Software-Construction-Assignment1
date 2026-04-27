@@ -4,6 +4,10 @@
 **Email:** mrqiu220367@uniq.edu.iq  
 **GitHub (Jenkins login):** kaka hama — Jenkins is set up to sign in with **GitHub** (OAuth), which links your Jenkins user to your GitHub account for jobs that pull from GitHub and for webhook/authentication options your instructor describes.
 
+**Repository:** [github.com/mohammedrzgar/Software-Construction-Assignment1](https://github.com/mohammedrzgar/Software-Construction-Assignment1)
+
+**Push from this PC (if not done yet):** the remote `origin` is set to the URL above. Git needs you to sign in. Use a **Personal Access Token** (not your Git password): [Create a fine-grained or classic token](https://github.com/settings/tokens) with `Contents: Read and write` for this repository, then run `git push -u origin main` in this folder. When Windows asks for a password, paste the token. Alternatively use [GitHub Desktop](https://desktop.github.com/) and sign in with your account, then “Push origin”.
+
 ---
 
 Small Flask application with a **Jenkins pipeline** that runs automated tests, builds a **Docker** image, and **pushes** it to **Docker Hub** when the pipeline runs (e.g. after a push to GitHub that triggers a build).
