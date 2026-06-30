@@ -10,6 +10,8 @@ pipeline {
 
     environment {
         IMAGE_BASENAME = 'assignment-1-app'
+        // Jenkins Windows service does not inherit your user PATH — add Python + Docker explicitly
+        PATH = "C:\\Users\\mohammed\\AppData\\Local\\Programs\\Python\\Python312;C:\\Users\\mohammed\\AppData\\Local\\Programs\\Python\\Python312\\Scripts;C:\\Program Files\\Docker\\Docker\\resources\\bin;${env.PATH}"
     }
 
     stages {
