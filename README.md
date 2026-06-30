@@ -15,7 +15,8 @@ This project is a small **Flask** service with **pytest** tests, a **Docker** im
 | `requirements.txt` | Python dependencies (including test tools) |
 | `requirements-prod.txt` | Runtime dependencies for the container image |
 | `Dockerfile` | Image build; runs the app with Gunicorn |
-| `Jenkinsfile` | Pipeline: create venv, run tests, `docker build`, `docker push` |
+| `docker-compose.yml` | Local Docker run (`docker compose up --build`) |
+| `docs/JENKINS_AND_DOCKER_SETUP.md` | Jenkins server URL, plugins, credentials, job config, screenshots checklist |
 
 ## Local run (Windows)
 
@@ -36,7 +37,20 @@ docker build -t sc-assignment1:local .
 docker run --rm -p 5000:5000 sc-assignment1:local
 ```
 
-## Jenkins
+| `Jenkinsfile` | Pipeline: create venv, run tests, `docker build`, `docker push` |
+
+## Jenkins server (this project)
+
+| Item | Value |
+|------|--------|
+| **URL** | **http://localhost:8080** |
+| **Platform** | Windows (Jenkins service) |
+| **Job** | Pipeline from SCM → `https://github.com/mohammedrzgar/Software-Construction-Assignment1.git` |
+| **Credential** | `dockerhub-credentials` (Docker Hub token) |
+
+**Full configuration guide (for lecturer):** [`docs/JENKINS_AND_DOCKER_SETUP.md`](docs/JENKINS_AND_DOCKER_SETUP.md)
+
+## Jenkins job setup (summary)
 
 - Install the **Pipeline** and **Git** (and any **GitHub** integration) plugins as needed.  
 - Add a **Username with password** credential in Jenkins, **ID:** `dockerhub-credentials` (username = Docker Hub user, password = [access token](https://docs.docker.com/security/access-tokens/)).  

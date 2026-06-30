@@ -32,25 +32,40 @@ In this work, GitHub is the **source of truth** for the code, Jenkins is the **a
 
 Failing tests stop the pipeline, so a broken build is not published.
 
-## 5. GitHub and Jenkins
+## 5. Jenkins server and configuration
+
+| Setting | Value |
+|---------|--------|
+| **Host** | Local Windows machine |
+| **URL** | `http://localhost:8080` |
+| **Service** | Windows service **Jenkins** |
+| **Authentication** | GitHub sign-in |
+| **Job name** | `Software-Construction-Assignment1` |
+| **Pipeline source** | SCM — Git repository on GitHub, branch `main`, script `Jenkinsfile` |
+| **Credential ID** | `dockerhub-credentials` (Docker Hub username + access token) |
+| **Trigger** | GitHub webhook or **Poll SCM** (`H/5 * * * *`) |
+
+Full step-by-step configuration (plugins, job fields, Docker install, screenshots for submission) is in **`docs/JENKINS_AND_DOCKER_SETUP.md`**.
+
+## 6. GitHub and Jenkins
 
 To react to new commits, the repository is linked to Jenkins either by a **webhook** (HTTP POST to Jenkins) or by **SCM polling**. The pipeline definition lives in the repo as `Jenkinsfile` so the build is **versioned** like the code.
 
-## 6. Docker and Docker Hub
+## 7. Docker and Docker Hub
 
 A **Dockerfile** defines the **image**: base system, dependencies, and the command to start the application (**Gunicorn** in this project). The image is a **portable** unit. **Docker Hub** stores the built images. **Secrets** (Docker Hub login) are not stored in Git: they are configured in **Jenkins → Credentials** and read in the `Build and push` stage. Using an **access token** instead of the main account password is recommended for Docker Hub.
 
-## 7. Security notes
+## 8. Security notes
 
 - Keep registry credentials in Jenkins, not in the repository.  
 - Use tokens with limited scope where possible.  
 - **Build number** and **Git** revision together identify what was built.
 
-## 8. Conclusion
+## 9. Conclusion
 
 The project shows an automated path from a **Git push** to **tested, containerized** software on **Docker Hub**, with Jenkins orchestrating the steps. Further extensions could include a staging environment, stricter static analysis, or deployment to a cloud service.
 
-## 9. References
+## 10. References
 
 - Software Construction module — **lecture materials** on version control, automated builds, testing, and **DevOps/CI-CD**.  
 - [Jenkins Pipeline](https://www.jenkins.io/doc/book/pipeline/)  
