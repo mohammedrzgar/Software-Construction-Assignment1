@@ -1,7 +1,27 @@
 // Assignment 1 — Jenkins + GitHub + Docker Hub
 // Jenkins credential ID: dockerhub-credentials (Username with password = Docker Hub token)
-pipeline {
-    agent any
+// Fallback: JENKINS_HOME/secrets/dockerhub-token.txt (local Jenkins only, not in git)
+
+def dockerBuildAndPush(String hubUser, String hubToken) {
+    if (isUnix()) {
+        sh """
+            set -e
+            echo ${hubToken} | docker login -u ${hubUser} --password-stdin
+            docker build -t ${hubUser}/${env.IMAGE_BASENAME}:${env.BUILD_NUMBER} -t ${hubUser}/${env.IMAGE_BASENAME}:latest .
+            docker push ${hubUser}/${env.IMAGE_BASENAME}:${env.BUILD_NUMBER}
+            docker push ${hubUser}/${env.IMAGE_BASENAME}:latest
+        """
+    } else {
+        bat """
+            echo ${hubToken}| docker login -u ${hubUser} --password-stdin
+            docker build -t ${hubUser}/${env.IMAGE_BASENAME}:${env.BUILD_NUMBER} -t ${hubUser}/${env.IMAGE_BASENAME}:latest .
+            docker push ${hubUser}/${env.IMAGE_BASENAME}:${env.BUILD_NUMBER}
+            docker push ${hubUser}/${env.IMAGE_BASENAME}:latest
+        """
+    }
+}
+
+pipeline {    agent any
 
     options {
         timestamps()
@@ -47,27 +67,19 @@ pipeline {
 
         stage('Build and push image') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-credentials',
-                    usernameVariable: 'HUB_USER',
-                    passwordVariable: 'HUB_TOKEN'
-                )]) {
-                    script {
-                        if (isUnix()) {
-                            sh """
-                                set -e
-                                echo \${HUB_TOKEN} | docker login -u \${HUB_USER} --password-stdin
-                                docker build -t \${HUB_USER}/\${IMAGE_BASENAME}:${env.BUILD_NUMBER} -t \${HUB_USER}/\${IMAGE_BASENAME}:latest .
-                                docker push \${HUB_USER}/\${IMAGE_BASENAME}:${env.BUILD_NUMBER}
-                                docker push \${HUB_USER}/\${IMAGE_BASENAME}:latest
-                            """
-                        } else {
-                            bat """
-                                echo %HUB_TOKEN%| docker login -u %HUB_USER% --password-stdin
-                                docker build -t %HUB_USER%/%IMAGE_BASENAME%:${env.BUILD_NUMBER} -t %HUB_USER%/%IMAGE_BASENAME%:latest .
-                                docker push %HUB_USER%/%IMAGE_BASENAME%:${env.BUILD_NUMBER}
-                                docker push %HUB_USER%/%IMAGE_BASENAME%:latest
-                            """
+                script {
+                    def tokenFile = "${env.JENKINS_HOME}/secrets/dockerhub-token.txt"
+                    if (fileExists(tokenFile)) {
+                        def hubUser = 'kakahama'
+                        def hubToken = readFile(tokenFile).trim()
+                        dockerBuildAndPush(hubUser, hubToken)
+                    } else {
+                        withCredentials([usernamePassword(
+                            credentialsId: 'dockerhub-credentials',
+                            usernameVariable: 'HUB_USER',
+                            passwordVariable: 'HUB_TOKEN'
+                        )]) {
+                            dockerBuildAndPush(env.HUB_USER, env.HUB_TOKEN)
                         }
                     }
                 }
